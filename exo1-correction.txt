@@ -1,0 +1,41 @@
+/app
+  /presentation           # Ce qui parle au monde extérieur (API / Web)
+    app.py                # Point d'entrée de l'application (routes, serveur)
+    html_renderer.py      # Génération de HTML ou adaptation pour la vue
+
+  /domain                 # Cœur métier : règles, logique, modèles
+    cart.py               # Logique métier du panier
+    product.py            # Logique métier liée aux produits
+    services.py           # Orchestration métier (cas d’usage)
+
+  /infrastructure         # Accès aux ressources techniques
+    db.py                 # Connexion à la base / repository
+    logging_adapter.py    # Gestion des logs
+    session_store.py      # Gestion des sessions / état persistant
+
+  /shared                 # Outils génériques, utilitaires communs
+    utils.py
+
+  /admin                  # Fonctions d’administration
+    admin_tools.py
+
+  /legacy                 # Code ancien à retraiter / à supprimer
+    old_backup_code_final_v3(1).py
+
+  /var
+    logs.txt              # Fichier de log déplacé hors du code source
+
+| Fichier d’origine                | Nouveau fichier / emplacement            | Justification                                                                   |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------- |
+| `app.py`                         | `/presentation/app.py`                   | Point d’entrée de l’appli, gère les routes / contrôleurs → couche présentation. |
+| `utils.py`                       | `/shared/utils.py`                       | Fonctions génériques réutilisables, pas spécifiques à un domaine → “shared”.    |
+| `db.py`                          | `/infrastructure/db.py`                  | Gestion de la base de données (connexion, requêtes, repository) → infra.        |
+| `admin_tools.py`                 | `/admin/admin_tools.py`                  | Fonctions d’admin (scripts, outils) séparées de l’app métier principale.        |
+| `cart_logic.py`                  | `/domain/cart.py`                        | Logique métier du panier → cœur métier.                                         |
+| `html_builder.py`                | `/presentation/html_renderer.py`         | Génération de pages HTML / vue → couche présentation.                           |
+| `logs.txt`                       | `/var/logs.txt`                          | Données de log, ne doit pas se trouver dans le code source → répertoire var.    |
+| `session_global_state.py`        | `/infrastructure/session_store.py`       | Gestion de l’état / session → souvent lié au stockage / infra.                  |
+| `product_manager.py`             | `/domain/product.py`                     | Logique métier liée aux produits → domaine.                                     |
+| `old_backup_code_final_v3(1).py` | `/legacy/old_backup_code_final_v3(1).py` | Code obsolète à archiver / supprimer, clairement isolé du reste.                |
+
+
