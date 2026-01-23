@@ -1,3 +1,5 @@
+namespace Archi.API.Models;
+
 public class TacosModel
 {
     public int Id { get; set; }

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+namespace Archi.API.Data;
+
 public class ArchiDbContext : DbContext
 {
     public ArchiDbContext(DbContextOptions<ArchiDbContext> options)
@@ -7,5 +9,5 @@ public class ArchiDbContext : DbContext
     {
     }
 
-
+    public DbSet<TacosModel> Tacos { get; set; }
 }
