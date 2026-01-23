@@ -1,3 +1,4 @@
+using Archi.API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Archi.API.Data;
