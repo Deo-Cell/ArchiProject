@@ -90,7 +90,7 @@ Vous devrez réaliser la doc de l'API avec SwaggerUI [aide](https://swagger.io/s
 
 # Groupes et fonctionnement
 
-Le projet est a développé en groupe de 4 personnes.
+Le projet est a développé en groupe de 2 personnes ou en solo.
 Tous les groupes seront définis en cours, sous la supervision de l'enseignant. Les groupes s'enregistrent avec un nom de groupe ainsi que les noms de leurs membres.
 
 Toute inscription est définitive.  Les étudiants ne sont pas autorisés, par la suite, à changer de groupe.
