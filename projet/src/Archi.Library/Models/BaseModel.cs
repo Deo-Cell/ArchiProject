@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Archi.Library.Models
+namespace Archi.Library.Data
 {
 
     public abstract class BaseModel

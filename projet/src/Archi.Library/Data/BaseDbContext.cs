@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Archi.Library.Models
+namespace Archi.Library.Data
 {
     public abstract class BaseDbContext : DbContext
     {

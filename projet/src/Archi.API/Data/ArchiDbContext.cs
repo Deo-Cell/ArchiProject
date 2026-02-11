@@ -1,5 +1,5 @@
 using Archi.API.Models;
-using Archi.Library.Models;
+using Archi.Library.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Archi.API.Data;

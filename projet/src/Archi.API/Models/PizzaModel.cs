@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Archi.Library.Models;
+using Archi.Library.Data;
 
 namespace Archi.API.Models;
 
