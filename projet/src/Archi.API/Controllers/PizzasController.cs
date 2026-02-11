@@ -2,26 +2,27 @@
 
 using Archi.API.Data;
 using Archi.API.Models;
+using Archi.Library.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Archi.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PizzasController : ControllerBase
+public class PizzasController : BaseController<ArchiDbContext, PizzaModel>
 {
-    private readonly ArchiDbContext _context;
+    //private readonly ArchiDbContext _context;
 
-    public PizzasController(ArchiDbContext context)
+    public PizzasController(ArchiDbContext context) : base(context)
     {
-        _context = context;
+        //        _context = context;
     }
 
-    [HttpGet]
+    /*[HttpGet]
     public ActionResult<IEnumerable<PizzaModel>> Get()
     {
-        return Ok(_context.Pizzas.ToList());
-    }
+        return Ok(_context.Pizzas.Where(x => !x.IsDeleted).ToList());
+    }*/
 
     [HttpGet("{id}")]
     public ActionResult<PizzaModel> GetById([FromRoute] int id)
