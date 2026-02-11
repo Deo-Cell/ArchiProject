@@ -1,9 +1,10 @@
 using Archi.API.Models;
+using Archi.Library.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Archi.API.Data;
 
-public class ArchiDbContext : DbContext
+public class ArchiDbContext : BaseDbContext
 {
     public ArchiDbContext(DbContextOptions<ArchiDbContext> options)
     : base(options)

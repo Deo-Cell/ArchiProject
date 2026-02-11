@@ -79,6 +79,7 @@ public class PizzasController : ControllerBase
             return NotFound();
         }
         _context.Pizzas.Remove(pizza);
+        //_context.Entry(pizza).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
         _context.SaveChanges();
         return NoContent();
     }
