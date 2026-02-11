@@ -11,4 +11,5 @@ public class ArchiDbContext : DbContext
     }
 
     public DbSet<TacosModel> Tacos { get; set; }
+    public DbSet<PizzaModel> Pizzas { get; set; }
 }
