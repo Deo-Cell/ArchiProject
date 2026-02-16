@@ -1,0 +1,211 @@
+### Variables
+@baseUrl = http://localhost:5033
+@pizzaId = 1
+@tacoId = 1
+@burgerId = 1
+
+### ========================================
+### TESTS DE PAGINATION
+### ========================================
+
+### 1. GET - Pagination par défaut (sans range)
+GET {{baseUrl}}/api/pizzas
+Accept: application/json
+
+### 2. GET - Première page (0-9)
+GET {{baseUrl}}/api/pizzas?range=0-9
+Accept: application/json
+
+### 3. GET - Deuxième page (10-19)
+GET {{baseUrl}}/api/pizzas?range=10-19
+Accept: application/json
+
+### 4. GET - Page personnalisée (0-4)
+GET {{baseUrl}}/api/pizzas?range=0-4
+Accept: application/json
+
+### 5. GET - Pagination sur tacos
+GET {{baseUrl}}/api/tacos?range=0-2
+Accept: application/json
+
+### 6. GET - Pagination sur burgers
+GET {{baseUrl}}/api/burger?range=0-9
+Accept: application/json
+
+
+### 2. POST - Créer une nouvelle pizza
+POST {{baseUrl}}/api/pizzas
+Content-Type: application/json
+
+{
+  "name": "Margherita",
+  "base": "Tomate",
+  "composition": "Mozzarella, Basilic",
+  "price": 12.50
+}
+
+### 3. POST - Créer une autre pizza
+POST {{baseUrl}}/api/pizzas
+Content-Type: application/json
+
+{
+  "name": "4 Fromages",
+  "base": "Crème",
+  "composition": "Mozzarella, Gorgonzola, Parmesan, Chèvre",
+  "price": 14.90
+}
+
+### 4. GET - Récupérer une pizza par ID
+GET {{baseUrl}}/api/pizzas/{{pizzaId}}
+Accept: application/json
+
+### 5. PUT - Modifier une pizza
+PUT {{baseUrl}}/api/pizzas/{{pizzaId}}
+Content-Type: application/json
+
+{
+  "id": {{pizzaId}},
+  "name": "Margherita Deluxe",
+  "base": "Tomate",
+  "composition": "Mozzarella di Bufala, Basilic fraiche",
+  "price": 15.50
+}
+
+### 6. DELETE - Supprimer une pizza (soft delete)
+DELETE {{baseUrl}}/api/pizzas/{{pizzaId}}
+
+### 7. GET - Vérifier que la pizza supprimée n'apparaît plus
+GET {{baseUrl}}/api/pizzas
+Accept: application/json
+
+### ========================================
+### TACOS
+### ========================================
+
+### 8. GET - Liste tous les tacos
+GET {{baseUrl}}/api/tacos
+Accept: application/json
+
+### 9. POST - Créer un nouveau taco
+POST {{baseUrl}}/api/tacos
+Content-Type: application/json
+
+{
+  "name": "Taco Poulet",
+  "sauce": "Algérienne",
+  "meat": "Poulet",
+  "price": 8.50,
+  "isVegan": false
+}
+
+### 10. POST - Créer un taco vegan
+POST {{baseUrl}}/api/tacos
+Content-Type: application/json
+
+{
+  "name": "Taco Veggie",
+  "sauce": "Blanche",
+  "meat": "Falafel",
+  "price": 9.00,
+  "isVegan": true
+}
+
+### 11. GET - Récupérer un taco par ID
+GET {{baseUrl}}/api/tacos/{{tacoId}}
+Accept: application/json
+
+### 12. PUT - Modifier un taco
+PUT {{baseUrl}}/api/tacos/{{tacoId}}
+Content-Type: application/json
+
+{
+  "id": {{tacoId}},
+  "name": "Taco Poulet Épicé",
+  "sauce": "Harissa",
+  "meat": "Poulet mariné",
+  "price": 9.50,
+  "isVegan": false
+}
+
+### 13. DELETE - Supprimer un taco
+DELETE {{baseUrl}}/api/tacos/{{tacoId}}
+
+### ========================================
+### BURGERS 🍔
+### ========================================
+
+### 14. GET - Liste tous les burgers
+GET {{baseUrl}}/api/burger
+Accept: application/json
+
+### 15. POST - Créer un nouveau burger
+POST {{baseUrl}}/api/burger
+Content-Type: application/json
+
+{
+  "name": "Classic Burger",
+  "sauce": "Ketchup",
+  "meat": "Boeuf",
+  "price": 11.50,
+  "isVegan": false
+}
+
+### 16. POST - Créer un burger vegan
+POST {{baseUrl}}/api/burger
+Content-Type: application/json
+
+{
+  "name": "Beyond Burger",
+  "sauce": "Vegan Mayo",
+  "meat": "Beyond Meat",
+  "price": 13.50,
+  "isVegan": true
+}
+
+### 17. GET - Récupérer un burger par ID
+GET {{baseUrl}}/api/burger/{{burgerId}}
+Accept: application/json
+
+### 18. PUT - Modifier un burger
+PUT {{baseUrl}}/api/burger/{{burgerId}}
+Content-Type: application/json
+
+{
+  "id": {{burgerId}},
+  "name": "Deluxe Burger",
+  "sauce": "BBQ",
+  "meat": "Boeuf Angus",
+  "price": 14.90,
+  "isVegan": false
+}
+
+### 19. DELETE - Supprimer un burger
+DELETE {{baseUrl}}/api/burger/{{burgerId}}
+
+### 20. GET - Vérifier que le burger supprimé n'apparaît plus
+GET {{baseUrl}}/api/burger
+Accept: application/json
+
+### ========================================
+### TESTS DE VALIDATION
+### ========================================
+
+### 21. POST - Tester validation (pizza sans nom - devrait échouer)
+POST {{baseUrl}}/api/pizzas
+Content-Type: application/json
+
+{
+  "base": "Tomate",
+  "composition": "Test",
+  "price": 10.00
+}
+
+### 22. POST - Tester validation (burger avec prix négatif - devrait réussir mais à vérifier)
+POST {{baseUrl}}/api/burger
+Content-Type: application/json
+
+{
+  "name": "Test Burger",
+  "meat": "Poulet",
+  "price": -5.00
+}

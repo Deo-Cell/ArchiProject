@@ -15,63 +15,10 @@ public class TacosController : BaseController<ArchiDbContext, TacosModel>
     {
     }
 
-    [HttpGet("{id}")]
-    public ActionResult<TacosModel> GetById([FromRoute] int id)
-    {
-        var tacos = _context.Tacos.Find(id);
-        if (tacos == null)
-        {
-            return NotFound();
-        }
-        return Ok(tacos);
-    }
-
-    [HttpPost]
-    public ActionResult<TacosModel> Post([FromBody] TacosModel tacos)
-    {
-        if (ModelState.IsValid)
-        {
-            _context.Tacos.Add(tacos);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(Get), new { id = tacos.Id }, tacos);
-        }
-        else
-        {
-            return BadRequest(ModelState);
-        }
-    }
-
-    [HttpPut("{id}")]
-    public ActionResult Put([FromRoute] int id, [FromBody] TacosModel tacos)
-    {
-        if (id != tacos.Id)
-        {
-            return BadRequest();
-        }
-        var existingTacos = _context.Tacos.Find(id);
-        if (existingTacos == null)
-        {
-            return NotFound();
-        }
-        if (ModelState.IsValid)
-        {
-            _context.Entry(existingTacos).CurrentValues.SetValues(tacos);
-            _context.SaveChanges();
-            return NoContent();
-        }
-        return BadRequest(ModelState);
-    }
-
-    [HttpDelete("{id}")]
-    public ActionResult Delete([FromRoute] int id)
-    {
-        var tacos = _context.Tacos.Find(id);
-        if (tacos == null)
-        {
-            return NotFound();
-        }
-        _context.Tacos.Remove(tacos);
-        _context.SaveChanges();
-        return NoContent();
-    }
+    // 🎉 C'est tout ! Toutes les méthodes CRUD sont héritées de BaseController :
+    // - GET /api/tacos          → Get()
+    // - GET /api/tacos/{id}     → GetById(id)
+    // - POST /api/tacos         → Post(model)
+    // - PUT /api/tacos/{id}     → Put(id, model)
+    // - DELETE /api/tacos/{id}  → Delete(id)
 }
