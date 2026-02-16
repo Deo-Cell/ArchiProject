@@ -1,5 +1,6 @@
 using Archi.Library.Data;
 using Archi.Library.Pagination;
+using Archi.Library.Sorting;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Archi.Library.Controllers
@@ -9,14 +10,23 @@ namespace Archi.Library.Controllers
         protected readonly C _context = context;
 
         /// <summary>
-        /// Get all non-deleted entities with pagination support
+        /// Get all non-deleted entities with pagination and sorting support
         /// </summary>
         /// <param name="range">Range parameter (ex: "0-25" for items 0 to 25)</param>
+        /// <param name="asc">Ascending sort (ex: "name,price")</param>
+        /// <param name="desc">Descending sort (ex: "createdAt")</param>
         /// <returns>List of entities with pagination headers</returns>
         [HttpGet]
-        public virtual ActionResult<IEnumerable<M>> Get([FromQuery] string? range)
+        public virtual ActionResult<IEnumerable<M>> Get(
+            [FromQuery] string? range,
+            [FromQuery] string? asc,
+            [FromQuery] string? desc)
         {
             var query = _context.Set<M>().Where(x => !x.IsDeleted);
+
+            // Appliquer le tri AVANT la pagination
+            var sortings = SortingParser.ParseSorting(asc, desc);
+            query = query.ApplySorting(sortings);
 
             // Compter le total AVANT pagination
             int total = query.Count();

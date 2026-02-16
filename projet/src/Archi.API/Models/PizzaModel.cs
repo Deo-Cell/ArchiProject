@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Archi.Library.Data;
 
 namespace Archi.API.Models;
@@ -22,6 +21,6 @@ public class PizzaModel : BaseModel
     public string Composition { get; set; } = string.Empty;
 
     [Range(0.0, 100.0, ErrorMessage = "{0} must be between {1} and {2}")]
-    public decimal Price { get; set; }
+    public double Price { get; set; }
 
 }

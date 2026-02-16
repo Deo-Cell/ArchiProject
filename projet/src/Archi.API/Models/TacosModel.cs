@@ -22,7 +22,7 @@ public class TacosModel : BaseModel
     public string Meat { get; set; } = string.Empty;
 
     [Range(0.0, 100.0, ErrorMessage = "{0} must be between {1} and {2}")]
-    public decimal Price { get; set; }
+    public double Price { get; set; }
 
     public bool IsVegan { get; set; }
 }
