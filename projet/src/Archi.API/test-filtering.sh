@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_URL="http://localhost:5033/api"
+BASE_URL="http://localhost:5033/api/v1"
 
 echo "🧪 Test des Filtres API Archi"
 echo "=============================="
