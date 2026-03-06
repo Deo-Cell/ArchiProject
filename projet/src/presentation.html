@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soutenance — Architecture Logicielle</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080d14;
+            --surface: #0e1724;
+            --border: #1a2d47;
+            --accent: #00c2ff;
+            --accent2: #7b61ff;
+            --green: #00e5a0;
+            --red: #ff5c8a;
+            --text: #e8f0f8;
+            --muted: #5a7a99;
+            --card: #111d2e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .deck {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            padding: 52px 64px;
+            opacity: 0;
+            transform: translateX(40px);
+            transition: opacity .35s ease, transform .35s ease;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 48px 48px;
+            opacity: .35;
+            pointer-events: none;
+        }
+
+        .speaker {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(0, 194, 255, .08);
+            border: 1px solid rgba(0, 194, 255, .25);
+            border-radius: 4px;
+            padding: 4px 12px;
+            width: fit-content;
+            margin-bottom: 24px;
+        }
+
+        .speaker.binome {
+            color: var(--accent2);
+            background: rgba(123, 97, 255, .08);
+            border-color: rgba(123, 97, 255, .25);
+        }
+
+        .slide-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            color: var(--muted);
+            letter-spacing: .1em;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -.02em;
+        }
+
+        h2 {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-weight: 700;
+            letter-spacing: -.01em;
+            margin-bottom: 32px;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+
+        .accent2 {
+            color: var(--accent2);
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .cols-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 22px 26px;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 10px 10px 0 0;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+
+        .card.green-top::before {
+            background: linear-gradient(90deg, var(--green), var(--accent));
+        }
+
+        .card.purple-top::before {
+            background: linear-gradient(90deg, var(--accent2), var(--red));
+        }
+
+        .card.red-top::before {
+            background: linear-gradient(90deg, var(--red), #ff9f43);
+        }
+
+        .card-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .78rem;
+            color: var(--accent);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .card-title.purple {
+            color: var(--accent2);
+        }
+
+        .card-title.green {
+            color: var(--green);
+        }
+
+        .card-title.red {
+            color: var(--red);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            font-size: .98rem;
+            color: var(--text);
+            padding: 5px 0 5px 18px;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        ul li::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .82rem;
+            background: rgba(0, 194, 255, .1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 194, 255, .2);
+        }
+
+        code.purple {
+            background: rgba(123, 97, 255, .12);
+            color: var(--accent2);
+            border-color: rgba(123, 97, 255, .2);
+        }
+
+        code.green {
+            background: rgba(0, 229, 160, .1);
+            color: var(--green);
+            border-color: rgba(0, 229, 160, .2);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .tag.blue {
+            border-color: rgba(0, 194, 255, .35);
+            color: var(--accent);
+            background: rgba(0, 194, 255, .06);
+        }
+
+        .tag.purple {
+            border-color: rgba(123, 97, 255, .35);
+            color: var(--accent2);
+            background: rgba(123, 97, 255, .06);
+        }
+
+        .tag.green {
+            border-color: rgba(0, 229, 160, .35);
+            color: var(--green);
+            background: rgba(0, 229, 160, .06);
+        }
+
+        .tag.red {
+            border-color: rgba(255, 92, 138, .35);
+            color: var(--red);
+            background: rgba(255, 92, 138, .06);
+        }
+
+        .slide-title h1 {
+            font-size: clamp(2.8rem, 5.5vw, 5rem);
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--muted);
+            margin-top: 16px;
+            letter-spacing: .04em;
+        }
+
+        .big-line {
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            margin: 28px 0;
+            border-radius: 2px;
+        }
+
+        .meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            color: var(--muted);
+            display: flex;
+            gap: 32px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: inline-block;
+        }
+
+        .arch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin: 0 auto;
+        }
+
+        .arch-box {
+            width: 380px;
+            text-align: center;
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 1.5px solid;
+            position: relative;
+        }
+
+        .arch-box.top {
+            border-color: var(--accent);
+            background: rgba(0, 194, 255, .07);
+        }
+
+        .arch-box.bottom {
+            border-color: var(--accent2);
+            background: rgba(123, 97, 255, .07);
+        }
+
+        .arch-box h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .arch-box p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem;
+            color: var(--muted);
+        }
+
+        .arch-arrow {
+            width: 2px;
+            height: 32px;
+            background: linear-gradient(var(--accent), var(--accent2));
+            position: relative;
+        }
+
+        .arch-arrow::after {
+            content: '▼';
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--accent2);
+            font-size: .7rem;
+        }
+
+        .arch-db {
+            width: 220px;
+            text-align: center;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1.5px dashed var(--green);
+            background: rgba(0, 229, 160, .05);
+            margin-top: 32px;
+        }
+
+        .arch-db h3 {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--green);
+            margin-bottom: 2px;
+        }
+
+        .arch-db p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            color: var(--muted);
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        .feature-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            color: var(--accent);
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-badge::before {
+            content: '';
+            width: 28px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .nav {
+            position: fixed;
+            bottom: 28px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav button {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .2s, background .2s;
+        }
+
+        .nav button:hover {
+            border-color: var(--accent);
+            background: rgba(0, 194, 255, .08);
+        }
+
+        .nav .counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .78rem;
+            color: var(--muted);
+            min-width: 52px;
+            text-align: center;
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width .35s ease;
+            border-radius: 0 2px 2px 0;
+        }
+
+        .plan-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .plan-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .plan-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem;
+            color: var(--accent);
+            background: rgba(0, 194, 255, .1);
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .plan-num.p {
+            color: var(--accent2);
+            background: rgba(123, 97, 255, .1);
+        }
+
+        .plan-item-text {
+            font-size: .92rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .plan-item-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .op-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .op-table th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .op-table td {
+            font-size: .88rem;
+            padding: 9px 12px;
+            border-bottom: 1px solid rgba(26, 45, 71, .5);
+            vertical-align: middle;
+        }
+
+        .op-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .stat-num {
+            font-size: 2.4rem;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            color: var(--muted);
+            letter-spacing: .08em;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress">
+        <div class="progress-bar" id="bar"></div>
+    </div>
+
+    <div class="deck" id="deck">
+
+        <!-- SLIDE 1 — TITRE -->
+        <div class="slide slide-title active" data-index="0">
+            <div class="content" style="justify-content:center;gap:0;">
+                <div class="slide-num">01 / 15</div>
+                <h1><span class="accent">Architecture</span><br>Logicielle</h1>
+                <div class="subtitle">Soutenance de fin de projet — .NET 10 / C#</div>
+                <div class="big-line"></div>
+                <div class="meta">
+                    <span><span class="dot"></span> Deo-Gratias</span>
+                    <span><span class="dot" style="background:var(--accent2)"></span> Loïck</span>
+                    <span>⏱ 20 min + démo live</span>
+                </div>
+                <div class="tags" style="margin-top:32px;">
+                    <span class="tag blue">.NET 10</span>
+                    <span class="tag blue">C#</span>
+                    <span class="tag blue">REST API</span>
+                    <span class="tag green">SQLite</span>
+                    <span class="tag green">Entity Framework Core</span>
+                    <span class="tag purple">Generic BaseController</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2 — PLAN -->
+        <div class="slide" data-index="1">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">02 / 15</div>
+            <h2>Plan de <span class="accent">présentation</span></h2>
+            <div class="content">
+                <div class="plan-grid">
+                    <div class="plan-item">
+                        <div class="plan-num">01</div>
+                        <div>
+                            <div class="plan-item-text">Architecture globale</div>
+                            <div class="plan-item-sub">Archi.Library · Archi.API · BaseController&lt;T&gt;</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num">02</div>
+                        <div>
+                            <div class="plan-item-text">Pagination</div>
+                            <div class="plan-item-sub">?range=0-25 · Skip/Take · Headers HTTP</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num">03</div>
+                        <div>
+                            <div class="plan-item-text">Tri Dynamique</div>
+                            <div class="plan-item-sub">?asc=name · Reflection · LINQ Expressions</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num">04</div>
+                        <div>
+                            <div class="plan-item-text">Filtrage</div>
+                            <div class="plan-item-sub">Exact · Range · GreaterThan · LessThan</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num">05</div>
+                        <div>
+                            <div class="plan-item-text">Recherche</div>
+                            <div class="plan-item-sub">Wildcards * · Contains / StartsWith / EndsWith</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num">06</div>
+                        <div>
+                            <div class="plan-item-text">Réponses Partielles</div>
+                            <div class="plan-item-sub">Select dynamique · Reflection · JSON partiel</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num p">07</div>
+                        <div>
+                            <div class="plan-item-text" style="color:var(--accent2)">Logs · Swagger · Tests</div>
+                            <div class="plan-item-sub">Serilog · Swashbuckle · xUnit / Moq</div>
+                        </div>
+                    </div>
+                    <div class="plan-item">
+                        <div class="plan-num" style="color:var(--red);background:rgba(255,92,138,.1);">08</div>
+                        <div>
+                            <div class="plan-item-text" style="color:var(--red)">Défis & Démo live</div>
+                            <div class="plan-item-sub">Difficultés rencontrées · Démonstration</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3 — ARCHITECTURE GLOBALE -->
+        <div class="slide" data-index="2">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">03 / 15</div>
+            <h2>Architecture <span class="accent">Globale</span></h2>
+            <div class="content">
+                <div class="cols" style="align-items:start;">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Archi.Library — Moteur</div>
+                            <ul>
+                                <li>Socle technique <strong>générique</strong></li>
+                                <li><code>BaseController&lt;T&gt;</code></li>
+                                <li>Pagination · Tri · Filtrage</li>
+                                <li>Recherche · Partial Response</li>
+                                <li>Réutilisable & indépendant</li>
+                            </ul>
+                        </div>
+                        <div class="card purple-top">
+                            <div class="card-title purple">Archi.API — Cliente</div>
+                            <ul>
+                                <li>Hérite de <code class="purple">BaseController&lt;T&gt;</code></li>
+                                <li>Expose les endpoints REST</li>
+                                <li>Entités : Pizza, Tacos, Burger</li>
+                                <li>Zéro logique dupliquée</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div
+                        style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;">
+                        <div class="arch">
+                            <div class="arch-box top">
+                                <h3 style="color:var(--accent)">Archi.API</h3>
+                                <p>PizzasController : BaseController&lt;PizzaModel&gt;</p>
+                            </div>
+                            <div class="arch-arrow"></div>
+                            <div style="margin-top:14px;"></div>
+                            <div class="arch-box bottom">
+                                <h3 style="color:var(--accent2)">Archi.Library</h3>
+                                <p>BaseController&lt;T&gt; · IQueryable&lt;T&gt;</p>
+                            </div>
+                        </div>
+                        <div class="arch-db">
+                            <h3>SQLite</h3>
+                            <p>EF Core · ArchiDbContext</p>
+                        </div>
+                        <div class="tags" style="justify-content:center;">
+                            <span class="tag green">Microsoft.EntityFrameworkCore.Sqlite</span>
+                            <span class="tag blue">Microsoft.AspNetCore.Mvc</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4 — BASECONTROLLER -->
+        <div class="slide" data-index="3">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">04 / 15</div>
+            <h2><code style="font-size:1.5rem;background:none;border:none;padding:0">BaseController&lt;T&gt;</code>
+                <span class="accent">— CRUD Abstrait</span>
+            </h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Principe</div>
+                            <ul>
+                                <li>Héritage générique <code>&lt;T&gt;</code></li>
+                                <li>CRUD complet abstrait</li>
+                                <li><code>GET</code> · <code>POST</code> · <code>PUT</code> · <code>DELETE</code></li>
+                                <li>Contrainte : <code>EntityBase</code></li>
+                                <li>Injection <code>DbContext</code></li>
+                            </ul>
+                        </div>
+                        <div class="card green-top">
+                            <div class="card-title green">Bénéfices</div>
+                            <ul>
+                                <li>DRY — aucune duplication</li>
+                                <li>Nouveaux endpoints en <strong>3 lignes</strong></li>
+                                <li>Surcharge possible via <code>override</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card purple-top">
+                            <div class="card-title purple">Méthodes exposées</div>
+                            <ul>
+                                <li><code>Get()</code> — liste + tri/filtre/pagination</li>
+                                <li><code>GetById(int id)</code></li>
+                                <li><code>Post(T entity)</code></li>
+                                <li><code>Put(int id, T entity)</code></li>
+                                <li><code>Delete(int id)</code> — soft delete</li>
+                            </ul>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag blue">Microsoft.AspNetCore.Mvc</span>
+                            <span class="tag blue">ControllerBase</span>
+                            <span class="tag green">EF Core</span>
+                            <span class="tag green">IQueryable&lt;T&gt;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5 — PAGINATION -->
+        <div class="slide" data-index="4">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">05 / 15</div>
+            <h2>Pagination <span class="accent">— HTTP Standard</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Parsing URL</div>
+                            <ul>
+                                <li>Paramètre : <code>?range=0-25</code></li>
+                                <li>Format : <code>start-end</code></li>
+                                <li>Parser custom dans <code>PaginationHelper</code></li>
+                                <li>Défaut : <code>0-49</code> (50 items)</li>
+                            </ul>
+                        </div>
+                        <div class="card purple-top">
+                            <div class="card-title purple">EF Core</div>
+                            <ul>
+                                <li><code>.Skip(start)</code></li>
+                                <li><code>.Take(count)</code></li>
+                                <li>Requête SQL optimisée</li>
+                                <li><code>IQueryable&lt;T&gt;</code> lazy</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card green-top">
+                            <div class="card-title green">Headers HTTP retournés</div>
+                            <ul>
+                                <li><code>Content-Range: items 0-25/100</code></li>
+                                <li><code>Accept-Range: items 50</code></li>
+                                <li><code>Link: &lt;?range=26-50&gt;; rel="next"</code></li>
+                                <li>Links : <code>first</code> · <code>prev</code> · <code>next</code> ·
+                                    <code>last</code>
+                                </li>
+                            </ul>
+                            <div class="tags">
+                                <span class="tag blue">PaginationHelper</span>
+                                <span class="tag blue">PaginationHeaders</span>
+                                <span class="tag green">IQueryable</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:18px;">
+                    <div class="feature-badge">Flux de traitement</div>
+                    <div class="flow">
+                        <div class="flow-step">?range=0-25</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">Parse start/end</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">Skip/Take SQL</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">Headers HTTP</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">200 OK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6 — TRI DYNAMIQUE -->
+        <div class="slide" data-index="5">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">06 / 15</div>
+            <h2>Tri Dynamique <span class="accent">— Reflection & LINQ</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Syntaxe URL</div>
+                            <ul>
+                                <li><code>?asc=name</code> — croissant</li>
+                                <li><code>?desc=price</code> — décroissant</li>
+                                <li>Multi-colonnes supporté</li>
+                                <li><code>?asc=name&amp;desc=price</code></li>
+                            </ul>
+                        </div>
+                        <div class="card purple-top">
+                            <div class="card-title purple">Implémentation</div>
+                            <ul>
+                                <li><code>System.Reflection</code> — lecture propriétés</li>
+                                <li>Build <code>Expression&lt;Func&lt;T,object&gt;&gt;</code></li>
+                                <li><code>.OrderBy()</code> puis <code>.ThenBy()</code></li>
+                                <li>Insensible à la casse</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card green-top">
+                            <div class="card-title green">Pipeline</div>
+                            <div class="flow" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                                <div class="flow-step">?asc=name&amp;desc=price</div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">SortingParser → tuples</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">PropertyInfo via Reflection</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">Expression LINQ construite</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">SQL ORDER BY généré</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag blue">System.Reflection</span>
+                            <span class="tag blue">System.Linq.Expressions</span>
+                            <span class="tag green">SortingParser</span>
+                            <span class="tag green">SortingExtensions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7 — FILTRAGE (CORRIGÉ) -->
+        <div class="slide" data-index="6">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">07 / 15</div>
+            <h2>Filtrage Dynamique <span class="accent">— Expression Trees</span></h2>
+            <div class="content">
+                <table class="op-table" style="margin-bottom:20px;">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Syntaxe URL</th>
+                            <th>Expression LINQ</th>
+                            <th>Exemple concret</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Exact</code></td>
+                            <td><code>?name=Margherita</code></td>
+                            <td><code>x.Name == "Margherita"</code></td>
+                            <td>1 seule valeur</td>
+                        </tr>
+                        <tr>
+                            <td><code>Multiple</code></td>
+                            <td><code>?name=Margherita,Reine</code></td>
+                            <td><code>list.Contains(x.Name)</code></td>
+                            <td>Plusieurs valeurs (OU)</td>
+                        </tr>
+                        <tr>
+                            <td><code>Range</code></td>
+                            <td><code>?price=[10,12]</code></td>
+                            <td><code>x >= 10 && x <= 12</code></td>
+                            <td>Intervalle</td>
+                        </tr>
+                        <tr>
+                            <td><code>GreaterThan</code></td>
+                            <td><code>?price=[13,]</code></td>
+                            <td><code>x.Price >= 13</code></td>
+                            <td>Supérieur ou égal</td>
+                        </tr>
+                        <tr>
+                            <td><code>LessThan</code></td>
+                            <td><code>?price=[,10]</code></td>
+                            <td><code>x.Price <= 10</code></td>
+                            <td>Inférieur ou égal</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="cols" style="gap:16px;">
+                    <div class="card">
+                        <div class="card-title">Parsing dynamique</div>
+                        <ul>
+                            <li>Détection automatique du type d'opérateur</li>
+                            <li>Build <code>BinaryExpression</code></li>
+                            <li>Conversion type <code>string → double / DateTime</code></li>
+                            <li><code>.Where(predicate)</code> appliqué à IQueryable</li>
+                        </ul>
+                    </div>
+                    <div class="tags" style="align-content:center;">
+                        <span class="tag blue">System.Linq.Expressions</span>
+                        <span class="tag blue">QueryFilterParser</span>
+                        <span class="tag blue">FilterExpression</span>
+                        <span class="tag green">IQueryable.Where()</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8 — RECHERCHE (CORRIGÉ) -->
+        <div class="slide" data-index="7">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">08 / 15</div>
+            <h2>Recherche <span class="accent">— Pattern Matching</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Syntaxe Wildcards (*)</div>
+                            <ul>
+                                <li><code>?search=name:*ari*</code> → <strong>Contains</strong></li>
+                                <li><code>?search=name:M*</code> → <strong>StartsWith</strong></li>
+                                <li><code>?search=name:*ne</code> → <strong>EndsWith</strong></li>
+                                <li><code>?search=name:ari</code> → <strong>Exact match</strong></li>
+                            </ul>
+                        </div>
+                        <div class="card purple-top">
+                            <div class="card-title purple">Détection position des *</div>
+                            <ul>
+                                <li>Analyse de la position des astérisques</li>
+                                <li>Mappage vers méthode <code>string</code> C#</li>
+                                <li>Conversion en Expression LINQ</li>
+                                <li>Compatible multi-champs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card green-top">
+                            <div class="card-title green">Pipeline</div>
+                            <div class="flow" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                                <div class="flow-step">?search=name:*ari*</div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">SearchParser → tokens</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">Détecte * → Contains</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">Expression LINQ</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">SQL LIKE '%ari%'</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag blue">SearchParser</span>
+                            <span class="tag blue">SearchExtensions</span>
+                            <span class="tag blue">System.Linq.Expressions</span>
+                            <span class="tag green">String.Contains / StartsWith</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9 — RÉPONSES PARTIELLES -->
+        <div class="slide" data-index="8">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">09 / 15</div>
+            <h2>Réponses Partielles <span class="accent">— Bande passante</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Principe</div>
+                            <ul>
+                                <li><code>?fields=id,name,price</code></li>
+                                <li>Sélection dynamique de colonnes</li>
+                                <li>Économie bande passante</li>
+                                <li>Compatible pagination & filtrage</li>
+                            </ul>
+                        </div>
+                        <div class="card purple-top">
+                            <div class="card-title purple">Implémentation</div>
+                            <ul>
+                                <li><code>FieldSelector</code> — parse les champs</li>
+                                <li><code>DynamicProjection</code> — Reflection</li>
+                                <li>Build <code>Dictionary&lt;string, object&gt;</code></li>
+                                <li>Appliqué <strong>après</strong> pagination (en mémoire)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card green-top">
+                            <div class="card-title green">Pipeline</div>
+                            <div class="flow" style="flex-direction:column;align-items:flex-start;gap:8px;">
+                                <div class="flow-step">?fields=id,name</div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">FieldSelector.ParseFields()</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">Reflection → PropertyInfo</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">Dictionary&lt;string,object&gt;</div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;"><span class="flow-arrow">›</span>
+                                    <div class="flow-step">JSON partiel → 200 OK</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag blue">System.Reflection</span>
+                            <span class="tag blue">FieldSelector</span>
+                            <span class="tag blue">DynamicProjection</span>
+                            <span class="tag green">System.Text.Json</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10 — VERSIONING -->
+        <div class="slide" data-index="9">
+            <div class="speaker">Deo-Gratias</div>
+            <div class="slide-num">10 / 15</div>
+            <h2>Versioning <span class="accent">— URL Segment</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">Principe</div>
+                            <ul>
+                                <li>Version dans l'URL : <code>/api/v1/pizzas</code></li>
+                                <li>Stratégie : <code>UrlSegmentApiVersionReader</code></li>
+                                <li>Version par défaut : <code>v1.0</code></li>
+                                <li>Évolution sans casser le contrat client</li>
+                            </ul>
+                        </div>
+                        <div class="card green-top">
+                            <div class="card-title green">Configuration centralisée</div>
+                            <ul>
+                                <li><code>ApiVersionConfig</code> dans la Library</li>
+                                <li><code>AssumeDefaultVersionWhenUnspecified</code></li>
+                                <li><code>ReportApiVersions = true</code></li>
+                                <li>Headers de réponse enrichis</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card purple-top" style="margin-bottom:16px;">
+                            <div class="card-title purple">Avantages</div>
+                            <ul>
+                                <li>Rétro-compatibilité garantie</li>
+                                <li>Plusieurs versions en parallèle</li>
+                                <li><code class="purple">/api/v1/</code> et <code class="purple">/api/v2/</code>
+                                    coexistent</li>
+                                <li>Swagger documente chaque version</li>
+                            </ul>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag blue">Asp.Versioning.Mvc</span>
+                            <span class="tag blue">Asp.Versioning.Mvc.ApiExplorer</span>
+                            <span class="tag green">UrlSegmentApiVersionReader</span>
+                            <span class="tag green">ApiVersionConfig</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:18px;">
+                    <div class="feature-badge">Flux de résolution</div>
+                    <div class="flow">
+                        <div class="flow-step">/api/v1/pizzas</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">UrlSegmentReader</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">ApiVersion(1,0)</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">Route → Controller</div>
+                        <span class="flow-arrow">›</span>
+                        <div class="flow-step">200 OK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11 — LOGS -->
+        <div class="slide" data-index="10">
+            <div class="speaker binome">Loïck</div>
+            <div class="slide-num">11 / 15</div>
+            <h2>Logs <span class="accent2">— Serilog</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card purple-top" style="margin-bottom:16px;">
+                            <div class="card-title purple">Configuration</div>
+                            <ul>
+                                <li>Centralisé dans <code class="purple">Program.cs</code></li>
+                                <li>Middleware ASP.NET intégré</li>
+                                <li><code class="purple">UseSerilogRequestLogging()</code></li>
+                                <li>Structured logging</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Sinks</div>
+                            <ul>
+                                <li>Console enrichie</li>
+                                <li>Fichier horodaté <code>.txt</code></li>
+                                <li>Niveaux : Debug · Info · Warning · Error</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card green-top">
+                            <div class="card-title green">Bénéfices</div>
+                            <ul>
+                                <li>Traçabilité complète requêtes</li>
+                                <li>Contexte enrichi par requête</li>
+                                <li>Performance logs asynchrones</li>
+                                <li>Observabilité production</li>
+                            </ul>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag purple">Serilog.AspNetCore</span>
+                            <span class="tag purple">Serilog.Sinks.Console</span>
+                            <span class="tag purple">Serilog.Sinks.File</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11 — SWAGGER -->
+        <div class="slide" data-index="11">
+            <div class="speaker binome">Loïck</div>
+            <div class="slide-num">12 / 15</div>
+            <h2>Documentation <span class="accent2">— Swagger UI</span></h2>
+            <div class="content">
+                <div class="cols">
+                    <div>
+                        <div class="card purple-top" style="margin-bottom:16px;">
+                            <div class="card-title purple">Swashbuckle</div>
+                            <ul>
+                                <li>Auto-génération spec <code class="purple">OpenAPI</code></li>
+                                <li>UI interactive <code>/swagger</code></li>
+                                <li>Test en direct depuis le navigateur</li>
+                                <li>Annotations XML commentaires</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Versioning</div>
+                            <ul>
+                                <li>URL : <code>/api/v1/pizzas</code></li>
+                                <li>Versionné par contrôleur</li>
+                                <li>Évolutions sans casser le contrat</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card green-top">
+                            <div class="card-title green">Valeur ajoutée</div>
+                            <ul>
+                                <li>Documentation vivante & à jour</li>
+                                <li>Onboarding développeurs rapide</li>
+                                <li>Validation contrat API</li>
+                                <li>Export JSON / YAML</li>
+                            </ul>
+                        </div>
+                        <div class="tags" style="margin-top:16px;">
+                            <span class="tag purple">Swashbuckle.AspNetCore</span>
+                            <span class="tag purple">OpenAPI 3.0</span>
+                            <span class="tag blue">Asp.Versioning.Mvc</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12 — TESTS -->
+        <div class="slide" data-index="12">
+            <div class="speaker binome">Loïck</div>
+            <div class="slide-num">13 / 15</div>
+            <h2>Tests Unitaires <span class="accent2">— Qualité</span></h2>
+            <div class="content">
+                <div class="cols-3" style="margin-bottom:20px;">
+                    <div class="card purple-top">
+                        <div class="card-title purple">xUnit</div>
+                        <ul>
+                            <li>Framework de test .NET</li>
+                            <li><code class="purple">[Fact]</code> · <code class="purple">[Theory]</code></li>
+                            <li>Tests en isolation totale</li>
+                            <li>Runner : <code>dotnet test</code></li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Moq</div>
+                        <ul>
+                            <li>Mocking des dépendances</li>
+                            <li>Simulation <code>DbContext</code></li>
+                            <li>Vérification des appels</li>
+                            <li><code>.Setup() / .Verify()</code></li>
+                        </ul>
+                    </div>
+                    <div class="card green-top">
+                        <div class="card-title green">InMemoryDatabase</div>
+                        <ul>
+                            <li>EF Core In-Memory</li>
+                            <li>Sans SQLite réel</li>
+                            <li>Tests déterministes</li>
+                            <li>Rapide & isolé</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Couverture testée</div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+                        <span class="tag blue">Pagination Parser</span>
+                        <span class="tag blue">Tri Dynamique</span>
+                        <span class="tag blue">Filtrage opérateurs</span>
+                        <span class="tag blue">Recherche Wildcards</span>
+                        <span class="tag blue">Partial Response</span>
+                    </div>
+                </div>
+                <div class="tags" style="margin-top:16px;">
+                    <span class="tag purple">xUnit</span>
+                    <span class="tag purple">Moq</span>
+                    <span class="tag green">Microsoft.EntityFrameworkCore.InMemory</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13 — DÉFIS TECHNIQUES (NOUVELLE) -->
+        <div class="slide" data-index="13">
+            <div class="speaker">Deo-Gratias & Loïck</div>
+            <div class="slide-num">14 / 15</div>
+            <h2>Défis <span style="color:var(--red)">Techniques</span> Rencontrés</h2>
+            <div class="content">
+                <div class="cols-3">
+                    <div class="card red-top">
+                        <div class="card-title red">decimal vs double — SQLite</div>
+                        <ul>
+                            <li>SQLite refuse <code>ORDER BY</code> sur <code>decimal</code></li>
+                            <li>Erreur silencieuse, tri incohérent</li>
+                            <li><strong>Solution :</strong> Migration <code>decimal → double</code></li>
+                            <li>Appliquée sur tous les modèles</li>
+                        </ul>
+                        <div class="tags">
+                            <span class="tag red">SQLite limitation</span>
+                            <span class="tag green">Migration EF Core</span>
+                        </div>
+                    </div>
+                    <div class="card red-top">
+                        <div class="card-title red">Expression Trees dynamiques</div>
+                        <ul>
+                            <li>Construire du LINQ sans connaître <code>T</code></li>
+                            <li>Conversion <code>string → double / DateTime</code></li>
+                            <li><strong>Solution :</strong> <code>Expression.Convert()</code></li>
+                            <li>Gestion silencieuse des erreurs</li>
+                        </ul>
+                        <div class="tags">
+                            <span class="tag red">Runtime types</span>
+                            <span class="tag blue">System.Linq.Expressions</span>
+                        </div>
+                    </div>
+                    <div class="card red-top">
+                        <div class="card-title red">Projection & EF Core</div>
+                        <ul>
+                            <li>EF Core ne traduit pas <code>Dictionary</code> en SQL</li>
+                            <li>Crash si appliqué sur <code>IQueryable</code></li>
+                            <li><strong>Solution :</strong> Projection <strong>après</strong> pagination</li>
+                            <li>Exécutée en mémoire (50 items max)</li>
+                        </ul>
+                        <div class="tags">
+                            <span class="tag red">EF Core limitation</span>
+                            <span class="tag green">Post-query projection</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14 — CONCLUSION / DÉMO -->
+        <div class="slide" data-index="14">
+            <div class="slide-num">15 / 15</div>
+            <h2>Conclusion <span class="accent">&</span> <span class="accent2">Démo Live</span></h2>
+            <div class="content">
+                <div class="cols-3" style="margin-bottom:24px;">
+                    <div class="stat">
+                        <div class="stat-num accent">2</div>
+                        <div class="stat-label">Couches architecturales</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num" style="color:var(--green)">6</div>
+                        <div class="stat-label">Features abstraites</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num" style="color:var(--accent2)">0</div>
+                        <div class="stat-label">Duplication de code</div>
+                    </div>
+                </div>
+                <div class="cols">
+                    <div class="card">
+                        <div class="card-title">Résultats</div>
+                        <ul>
+                            <li>API REST <strong>production-ready</strong></li>
+                            <li>Architecture <strong>extensible</strong> & DRY</li>
+                            <li>Standards HTTP respectés</li>
+                            <li>Tests · Logs · Doc intégrés</li>
+                        </ul>
+                    </div>
+                    <div class="card green-top">
+                        <div class="card-title green">Démo — ordre suggéré</div>
+                        <ul>
+                            <li>Swagger UI — endpoints listés</li>
+                            <li><code>GET ?range=0-5</code> pagination</li>
+                            <li><code>?asc=name&amp;desc=price</code> tri</li>
+                            <li><code>?price=[10,12]</code> filtrage</li>
+                            <li><code>?search=name:*ari*</code> recherche</li>
+                            <li><code>?fields=id,name</code> partial</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="text-align:center;margin-top:24px;">
+                    <div class="big-line" style="margin:0 auto;"></div>
+                    <div
+                        style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted);margin-top:14px;">
+                        Merci — Questions ?</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav">
+        <button onclick="prev()" title="Précédent">‹</button>
+        <span class="counter" id="counter">1 / 15</span>
+        <button onclick="next()" title="Suivant">›</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let cur = 0;
+
+        function show(n) {
+            slides[cur].classList.remove('active');
+            cur = (n + slides.length) % slides.length;
+            const el = slides[cur];
+            el.style.transform = 'translateX(40px)';
+            el.style.opacity = '0';
+            el.classList.add('active');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    el.style.transform = 'translateX(0)';
+                    el.style.opacity = '1';
+                });
+            });
+            document.getElementById('counter').textContent = `${cur + 1} / ${slides.length}`;
+            document.getElementById('bar').style.width = `${((cur + 1) / slides.length) * 100}%`;
+        }
+
+        function next() { show(cur + 1); }
+        function prev() { show(cur - 1); }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') next();
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
+        });
+
+        document.getElementById('bar').style.width = `${(1 / slides.length) * 100}%`;
+    </script>
+
+</body>
+
+</html>
